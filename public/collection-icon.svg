@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB" id="filter_1">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+      <feOffset dx="0" dy="2" />
+      <feGaussianBlur stdDeviation="2" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.21568628 0 0 0 0 0.20784314 0 0 0 0 0.20784314 0 0 0 0.7490196 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect0_dropShadow" />
+      <feBlend mode="normal" in="SourceGraphic" in2="effect0_dropShadow" result="shape" />
+    </filter>
+    <path d="M0 0L24 0L24 24L0 24L0 0Z" id="path_1" />
+    <clipPath id="mask_1">
+      <use xlink:href="#path_1" />
+    </clipPath>
+  </defs>
+  <g id="Group-2">
+    <g filter="url(#filter_1)">
+      <g id="Check-All-icon">
+        <path d="M0 0L24 0L24 24L0 24L0 0Z" id="Background" fill="none" fill-rule="evenodd" stroke="none" />
+        <g clip-path="url(#mask_1)">
+          <path d="M4 2C2.895 2 2 2.895 2 4L2 16C2 17.105 2.895 18 4 18L16 18C17.105 18 18 17.105 18 16L18 4C18 2.895 17.105 2 16 2L4 2L4 2ZM14 6C14.256 6 14.512 6.09797 14.707 6.29297C15.097 6.68297 15.097 7.31703 14.707 7.70703L9.70703 12.707C9.31703 13.098 8.68297 13.098 8.29297 12.707L5.29297 9.70703C4.90297 9.31703 4.90297 8.68297 5.29297 8.29297C5.68297 7.90297 6.31703 7.90297 6.70703 8.29297L9 10.5859L13.293 6.29297C13.488 6.09797 13.744 6 14 6L14 6ZM21 6C20.448 6 20 6.448 20 7L20 20L7 20C6.448 20 6 20.448 6 21C6 21.552 6.448 22 7 22L20 22C21.105 22 22 21.105 22 20L22 7C22 6.448 21.552 6 21 6L21 6Z" id="Shape" fill="#FFFFFF" fill-rule="evenodd" stroke="none" />
+        </g>
+      </g>
+    </g>
+    <path d="M4 3L16 3L16 16L4 16L4 3Z" id="Rectangle-2" fill="#FFFFFF" fill-rule="evenodd" stroke="none" />
+  </g>
+</svg>

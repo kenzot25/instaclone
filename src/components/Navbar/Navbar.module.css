@@ -1,0 +1,83 @@
+.home {
+  background: no-repeat url("../../../public/icons/Home.svg");
+  width: 25px;
+  height: 25px;
+  background-size: contain;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.home-active {
+  background: no-repeat url("../../../public/icons/Home-fill.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.message {
+  background: no-repeat url("../../../public/icons/messenger.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.message-active {
+  background: no-repeat url("../../../public/icons/messenger-fill.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.create {
+  background: no-repeat url("../../../public/icons/add.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.create-active {
+  background: no-repeat url("../../../public/icons/add-fill.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.explore {
+  background: no-repeat url("../../../public/icons/explore.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.explore-active {
+  background: no-repeat url("../../../public/icons/explore-fill.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}
+.noti_nonactive {
+  background: no-repeat url("../../../public/icons/heart.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+}
+.noti_active {
+  cursor: pointer;
+  position: relative;
+  background: no-repeat url("../../../public/icons/heart-fill.svg");
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease-out;
+}

@@ -15,7 +15,12 @@ import {
 import { MasonryLayoutProfile } from "../components/MasonryLayout";
 import Spinner from "../components/UI/Spinner";
 // import { v4 as uuidv4 } from "uuid";
-import { changeAvatarUser, fetchUser } from "../utils/helper";
+import {
+  changeAvatarUser,
+  fetchUser,
+  followHelper,
+  getInfo,
+} from "../utils/helper";
 // import Modal from "../components/UI/Modal";
 import Modal from "react-modal";
 
@@ -44,6 +49,8 @@ const customStyles = {
 };
 Modal.setAppElement("#modal--overlay");
 
+const mainUser = getInfo();
+
 const UserProfile = ({ fetchDataAfterChanged }) => {
   const navigate = useNavigate();
   const { userId } = useParams();
@@ -51,18 +58,24 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
   const [loadingPost, setLoadingPost] = useState(true);
   const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [user, setUser] = useState(false);
+
   const [loadingUser, setLoadingUser] = useState(true);
   const [previewAvatar, setPreviewAvatar] = useState(false);
   const [previewAvatarUrl, setPreviewAvatarUrl] = useState("");
   const [isAuthor, setIsAuthor] = useState(false);
   const location = useLocation();
 
+  const [follow, setFollow] = useState(null);
+  const [countFollower, setCountFollower] = useState(null);
+
   useEffect(() => {
     let isCancelled = false;
+    setLoadingUser(true);
     // checkUserExit(userId).then((data) => console.log(data));
     fetchUser().then((data) => {
       let userInfo = data;
       let id = userInfo?.id;
+
       if (userId === id) {
         console.log("author");
         setIsAuthor(true);
@@ -76,6 +89,17 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
         if (!isCancelled && data.length > 0) {
           const userdata = { ...data[0] };
           setUser(userdata);
+
+          userdata.follower?.map((u) => {
+            if (u.userId === mainUser.id) {
+              return setFollow(true);
+            }
+            return null;
+          });
+          setCountFollower(() =>
+            userdata.follower?.length ? userdata.follower?.length : 0
+          );
+
           setTimeout(() => {
             setLoadingUser(false);
           }, 400);
@@ -146,6 +170,7 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
     }
   };
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [unfollowModalOpen, setUnfollowModalOpen] = useState(false);
   const clickControlHandler = () => {
     // location.pathname = "/wtf"
     setIsOpen(true);
@@ -155,10 +180,24 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
     setIsOpen(false);
     document.body.style.overflowY = "scroll";
   };
-  const logoutHandler = () => {
+  const logoutHandler = (e) => {
     localStorage.clear();
     navigate("/login");
   };
+
+  const followUserHandler = () => {
+    followHelper("follow", mainUser.id, userId);
+    setFollow(true);
+    setCountFollower((prev) => prev + 1);
+  };
+  const unFollowUserHandler = () => {
+    followHelper("unfollow", mainUser.id, userId);
+    setFollow(false);
+    setUnfollowModalOpen(false);
+    setCountFollower((prev) => prev - 1);
+    document.body.style.overflowY = "scroll";
+  };
+
   return (
     <>
       <Modal
@@ -194,6 +233,44 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
           </p>
           <hr />
           <p onClick={closeHandler} className="cursor-pointer ">
+            Cancel
+          </p>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={unfollowModalOpen}
+        // onAfterOpen={afterOpenModal}
+        onRequestClose={() => {
+          setUnfollowModalOpen(false);
+          document.body.style.overflowY = "scroll";
+        }}
+        style={customStyles}
+        contentLabel="Modal"
+      >
+        <div className="bg-white z-50   w-[90vw]  lg:w-[30vw] md:w-[50vw]  text-center flex flex-col justify-evenly  font-normal text-[.9rem]">
+          <div className="flex flex-col items-center justify-center py-[1.5rem]">
+            <img
+              alt="avartar"
+              className="lg:w-[7rem] md:w-[5rem] lg:h-[7rem] md:h-[5rem] w-[5rem] h-[5rem] rounded-full border-none shadow-lg "
+              src={user?.avatar}
+            />
+            <p className="mt-[.8rem]">Unfollow @{user.username}?</p>
+          </div>
+          <hr />
+          <p
+            className="cursor-pointer text-[#ED4956] font-medium py-[1rem]"
+            onClick={unFollowUserHandler}
+          >
+            Unfollow
+          </p>
+          <hr />
+          <p
+            onClick={() => {
+              setUnfollowModalOpen(false);
+              document.body.style.overflowY = "scroll";
+            }}
+            className="cursor-pointer py-[1rem]"
+          >
             Cancel
           </p>
         </div>
@@ -240,7 +317,7 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
                 </label>
               </div>
               <div className="flex flex-col h-full justify-center">
-                <div className="flex items-center  justify-start lg:justify-between">
+                <div className="flex items-center  justify-start ">
                   <p className="text-[1.8rem] font-thin mr-[1rem] md:mr-0 ">
                     {user?.username}
                   </p>
@@ -248,7 +325,7 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
                     <>
                       <Link
                         to="/accounts/edit/"
-                        className="hidden md:block cursor-pointer border border-[#DADADA] text-[0.8rem] font-semibold py-1 lg:h-auto h-[2rem]  mx-[1.2rem] lg:mx-0 text-center w-[7rem] rounded-sm"
+                        className="hidden md:block cursor-pointer border border-[#DADADA] text-[0.8rem] font-semibold py-1 lg:h-auto h-[2rem]  mx-[1.2rem]  text-center w-[7rem] rounded-sm"
                       >
                         Edit Profile
                       </Link>
@@ -256,7 +333,7 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
                         onClick={() => {
                           clickControlHandler();
                         }}
-                        alt=""
+                        alt="threedots-btn"
                         className="w-6 h-6 cursor-pointer"
                         src={process.env.PUBLIC_URL + "/icons/settings.svg"}
                       />
@@ -264,17 +341,54 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
                   )}
                   {!isAuthor && (
                     <>
-                      <Link
-                        to=""
-                        className="hidden md:block  bg-[#0095F6] cursor-pointer text-[#fff] text-[0.9rem] font-semibold py-[.35rem] mx-[1rem] text-center px-[2rem] rounded-[.2rem]"
-                        onClick={() => {
-                          alert(
-                            "Sorry :) We'll update this feature\nAnd,the next button doesn't work,u don't need to try that!"
-                          );
-                        }}
-                      >
-                        Follow
-                      </Link>
+                      {follow ? (
+                        <>
+                          <Link
+                            to=""
+                            className="hidden md:block  bg-transparent cursor-pointer text-[#000] text-[0.9rem] font-semibold py-[.2rem] ml-[1rem] text-center px-[.8rem] rounded-[.2rem] border"
+                            onClick={() => {
+                              alert("Sorry :) We'll update this feature");
+                            }}
+                          >
+                            Message
+                          </Link>
+                          <Link
+                            to=""
+                            className="hidden md:block  bg-transparent cursor-pointer text-[#000] text-[0.9rem] font-semibold  mx-[.5rem] text-center  rounded-[.2rem] border w-[4rem] py-[.5rem]"
+                            onClick={() => {
+                              setUnfollowModalOpen(true);
+                              document.body.style.overflow = "hidden";
+                            }}
+                          >
+                            <div className="flex items-center justify-center">
+                              <img
+                                alt="personicon"
+                                className="w-3"
+                                src={
+                                  process.env.PUBLIC_URL + "/icons/person.svg"
+                                }
+                              />
+                              <img
+                                alt="tickicon"
+                                className="w-3"
+                                src={process.env.PUBLIC_URL + "/icons/tick.svg"}
+                              />
+                            </div>
+                          </Link>
+                        </>
+                      ) : (
+                        <Link
+                          to="#"
+                          className="hidden md:block  bg-[#0095F6] cursor-pointer text-[#fff] text-[0.9rem] font-semibold py-[.35rem] mx-[1rem] text-center px-[2rem] rounded-[.2rem]"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            followUserHandler();
+                          }}
+                        >
+                          Follow
+                        </Link>
+                      )}
+
                       <img
                         alt=""
                         className="w-6 h-6 cursor-pointer"
@@ -283,16 +397,21 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
                     </>
                   )}
                 </div>
+
                 <div className=" hidden md:flex">
                   <p className="text-[1.2rem] flex">
                     <span className="font-medium mr-2">{data?.length}</span>{" "}
                     posts
                   </p>
                   <p className="text-[1.2rem] mx-[2rem] flex">
-                    <span className="font-medium mr-2">0</span> followers
+                    <span className="font-medium mr-2">{countFollower}</span>{" "}
+                    followers
                   </p>
                   <p className="text-[1.2rem] flex">
-                    <span className="font-medium mr-2">0</span> following
+                    <span className="font-medium mr-2">
+                      {user?.following?.length ? user?.following?.length : 0}
+                    </span>{" "}
+                    following
                   </p>
                 </div>
                 {/* Edit button for small device */}
@@ -304,15 +423,53 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
                     Edit Profile
                   </Link>
                 )}
-                {!isAuthor && (
-                  <Link
-                    to=""
-                    className="bg-[#0095F6]
+                {!isAuthor &&
+                  (follow ? (
+                    <div className="flex">
+                      <Link
+                        to=""
+                        className="block md:hidden  bg-transparent cursor-pointer text-[#000] text-[1rem] font-semibold py-[.3rem]  text-center px-[2rem] rounded-[.2rem] border"
+                        onClick={() => {
+                          alert("Sorry :) We'll update this feature");
+                        }}
+                      >
+                        Message
+                      </Link>
+                      <Link
+                        to=""
+                        className="block md:hidden  bg-transparent cursor-pointer text-[#000] text-[1rem] font-semibold  mx-[.5rem] text-center  rounded-[.2rem] border w-[4rem] py-[.5rem]"
+                        onClick={() => {
+                          setUnfollowModalOpen(true);
+                          document.body.style.overflow = "hidden";
+                        }}
+                      >
+                        <div className="flex items-center justify-center">
+                          <img
+                            alt="personicon"
+                            className="w-4"
+                            src={process.env.PUBLIC_URL + "/icons/person.svg"}
+                          />
+                          <img
+                            alt="tickicon"
+                            className="w-4"
+                            src={process.env.PUBLIC_URL + "/icons/tick.svg"}
+                          />
+                        </div>
+                      </Link>
+                    </div>
+                  ) : (
+                    <Link
+                      onClick={(e) => {
+                        e.preventDefault();
+                        followUserHandler();
+                      }}
+                      to=""
+                      className="bg-[#0095F6]
                     text-[#fff] md:hidden mt-[.6rem] cursor-pointer  text-[1rem] font-semibold lg:h-auto py-[.25rem] text-center px-[7rem] rounded-[.2rem]"
-                  >
-                    Follow
-                  </Link>
-                )}
+                    >
+                      Follow
+                    </Link>
+                  ))}
                 {/* End of Edit button for small device  */}
                 <p className="text-[1.2rem] font-medium hidden md:block">
                   {user?.fullname}
@@ -334,10 +491,16 @@ const UserProfile = ({ fetchDataAfterChanged }) => {
                 posts
               </p>
               <p className="text-[1rem] mx-[2rem] flex flex-col items-center font-light text-[#8e8e8e]">
-                <span className="font-medium = text-[#000]">0</span> followers
+                <span className="font-medium = text-[#000]">
+                  {countFollower}
+                </span>{" "}
+                followers
               </p>
               <p className="text-[1rem] flex flex-col items-center font-light text-[#8e8e8e]">
-                <span className="font-medium = text-[#000]">0</span> following
+                <span className="font-medium = text-[#000]">
+                  {user?.following?.length ? user?.follower?.length : 0}
+                </span>{" "}
+                following
               </p>
             </div>
             {/* End of show nums post,follow in small device  */}

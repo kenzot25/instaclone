@@ -37,6 +37,7 @@
   height: 25px;
   margin: 0 0.5rem;
   transition: all 0.2s ease-out;
+  cursor: pointer;
 }
 .create-active {
   background: no-repeat url("../../../public/icons/add-fill.svg");
@@ -45,6 +46,7 @@
   height: 25px;
   margin: 0 0.5rem;
   transition: all 0.2s ease-out;
+  cursor: pointer;
 }
 .explore {
   background: no-repeat url("../../../public/icons/explore.svg");

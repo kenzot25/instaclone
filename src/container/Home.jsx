@@ -39,6 +39,7 @@ const Home = () => {
         console.log("Fetch user data in Home");
         if (!isCancelled && data) {
           const userdata = { ...data[0] };
+          console.log(userdata)
           setUser(userdata);
         }
       });

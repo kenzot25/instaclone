@@ -196,3 +196,47 @@ export const changePasswordHelper = (idToken, newpassword) => {
       });
   }
 };
+
+export const followHelper = (type, idFollower, idUserGetFollow) => {
+  if (type === "follow") {
+    client
+      .patch(idUserGetFollow)
+      .setIfMissing({ follower: [] })
+      .insert("after", "follower[-1]", [
+        {
+          userId: idFollower,
+          _key: uuidv4(),
+          type: "follow",
+          userinfo: {
+            _type: "postedBy",
+            _ref: idFollower,
+          },
+        },
+      ])
+      .commit();
+      client
+      .patch(idFollower)
+      .setIfMissing({ following: [] })
+      .insert("after", "following[-1]", [
+        {
+          userId: idUserGetFollow,
+          _key: uuidv4(),
+          type: "follow",
+          userinfo: {
+            _type: "postedBy",
+            _ref: idUserGetFollow,
+          },
+        },
+      ])
+      .commit();
+  } else if (type === "unfollow") {
+    client.fetch(`*[_id =="${idUserGetFollow}"].follower`).then((data) => {
+      const removeFollower = [`follower[userId=="${idFollower}"]`];
+      client.patch(idUserGetFollow).unset(removeFollower).commit();
+    });
+    client.fetch(`*[_id =="${idFollower}"].following`).then((data) => {
+      const removeFollowing = [`following[userId=="${idUserGetFollow}"]`];
+      client.patch(idFollower).unset(removeFollowing).commit();
+    });
+  }
+};

@@ -13,6 +13,7 @@ import Picker from "emoji-picker-react";
 import {
   addCommentHelper,
   deleteCommentHelper,
+  getInfo,
   likePostHelper,
   savePostHelper,
 } from "../utils/helper";
@@ -52,8 +53,10 @@ Modal.setAppElement("#modal--overlay");
 const { SKIN_TONE_MEDIUM_DARK } = lazy(() => import("emoji-picker-react"));
 const ReactTimeAgo = lazy(() => import("react-time-ago"));
 // main func
+const mainUser = getInfo()
 const PostModal = ({ user, post }) => {
   // State
+  console.log(user)
   console.log("Post in postmodal: ");
   console.log(post);
   const [isAuthor, setIsAuthor] = useState(false);
@@ -64,7 +67,7 @@ const PostModal = ({ user, post }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
 
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(null);
   const [comment, setComment] = useState("");
   const [addingComment, setAddingComment] = useState(false);
   const [isEmoji, setIsEmoji] = useState();
@@ -112,11 +115,12 @@ const PostModal = ({ user, post }) => {
 
   useEffect(() => {
     // Like
+    // console.log(post)
     let isCancelled = false;
-    console.log("Post changed in post modal");
-    console.log(post);
+    // console.log("Post changed in post modal");
+    // console.log(post);
     if (post) {
-      if (post?.postedBy?._id === user?._id) {
+      if (post?.postedBy?._id === mainUser.id) {
         setIsAuthor(true);
       }
       if (!post.like) {
@@ -124,13 +128,15 @@ const PostModal = ({ user, post }) => {
       } else {
         !isCancelled && setNumsLike(post?.like?.length);
         post.like.map((wholike) => {
-          if (wholike?.postedBy?._id === user?._id && !isCancelled) {
+          console.log(wholike?.postedBy?._id, mainUser.id )
+          if (wholike?.postedBy?._id === mainUser.id && !isCancelled) {
+
             return setIsLiked(true);
           } else return null;
         });
       }
       const alreadySaved = !!post.save?.filter(
-        (item) => item?.postedBy?._id === user?._id
+        (item) => item?.postedBy?._id === mainUser.id
       )?.length;
       setIsSaved(alreadySaved);
     }

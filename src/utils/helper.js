@@ -214,7 +214,7 @@ export const followHelper = (type, idFollower, idUserGetFollow) => {
         },
       ])
       .commit();
-      client
+    client
       .patch(idFollower)
       .setIfMissing({ following: [] })
       .insert("after", "following[-1]", [

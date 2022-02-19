@@ -21,6 +21,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Modal from "react-modal";
+import PostOptions from "./PostOptions";
 const customStyles = {
   overlay: {
     position: "fixed",
@@ -74,6 +75,8 @@ const PostDetail = ({ user }) => {
   const { postID } = useParams();
   const postQuery = postDetailQuery(postID);
   const morePostQuery = userCreatedPostQuery(post?.postedBy?._id);
+
+  const [isFollowing, setIsFollowing] = useState(false);
   const navigate = useNavigate();
   // Func Helper
   const likePostHandler = ({ type }) => {
@@ -102,11 +105,21 @@ const PostDetail = ({ user }) => {
       await client.fetch(postQuery).then((data) => {
         if (!isCancelled) {
           setPost(data[0]);
+          client.fetch(`*[_id =="${data[0].postedBy?._id}"]`).then((data) => {
+            console.log(data);
+            data[0].follower.map((u) => {
+              if (u.userId === user._id) {
+                console.log("following");
+                return setIsFollowing(true);
+              }
+              return null;
+            });
+          });
           setIsLoading(false);
         }
       });
     },
-    [postQuery]
+    [postQuery, user?._id]
   );
   useEffect(() => {
     let isCancelled = false;
@@ -262,51 +275,19 @@ const PostDetail = ({ user }) => {
   return (
     <Suspense fallback={<Spinner />}>
       {isPostOptions && post && (
-        <Modal
-          isOpen={modalIsOpen}
-          // onAfterOpen={afterOpenModal}
-          onRequestClose={closeHandler}
-          style={customStyles}
-          contentLabel="Modal"
-        >
-          <div className="text-center flex flex-col justify-between lg:w-[30vw] md:[40vw] lg:h-[50vh] h-[65vh] w-[80vw]">
-            {!isAuthor && (
-              <>
-                <p className="cursor-pointer text-[#ED4956] font-medium pt-[1rem]">
-                  Report
-                </p>
-                <hr />
-                <p className="cursor-pointer text-[#ED4956] font-medium ">
-                  Follow
-                </p>
-              </>
-            )}
-            {isAuthor && (
-              <>
-                <p className="cursor-pointer text-[#ED4956] font-medium pt-[1rem]">
-                  Edit
-                </p>
-                <hr />
-                <p
-                  className="cursor-pointer text-[#ED4956] font-medium "
-                  onClick={deletePostHandler}
-                >
-                  Delete
-                </p>
-              </>
-            )}
-            <hr />
-            <p className=" cursor-pointer ">Share to...</p>
-            <hr />
-            <p className="cursor-pointer ">Copy link</p>
-            <hr />
-            <p className="cursor-pointer ">Embed</p>
-            <hr />
-            <p onClick={closeHandler} className="cursor-pointer pb-[1rem]">
-              Cancel
-            </p>
-          </div>
-        </Modal>
+        <PostOptions
+          modalIsOpen={modalIsOpen}
+          closeHandler={closeHandler}
+          isAuthor={isAuthor}
+          userID={user._id}
+          post={post}
+          deletePostHandler={deletePostHandler}
+          isFollowing={isFollowing}
+          changeFollowState={() => {
+            setIsFollowing((prev) => !prev);
+          }}
+          notHaveGoToPost={true}
+        />
       )}
       {post && (
         <Modal
@@ -597,10 +578,10 @@ const PostDetail = ({ user }) => {
 
                   {!addingComment ? (
                     <button
-                      disabled={comment.length === 0}
+                      disabled={comment?.length === 0}
                       onClick={addComment}
                       className={`text-[#0095f6]  font-medium cursor-pointer ${
-                        comment.length > 0 ? "opacity-100" : "opacity-30"
+                        comment?.length > 0 ? "opacity-100" : "opacity-30"
                       }`}
                     >
                       Post
@@ -612,7 +593,7 @@ const PostDetail = ({ user }) => {
               </div>
             </div>
           </div>
-          {morePosts.length > 0 && (
+          {morePosts?.length > 0 && (
             <>
               {/* {console.log(morePosts)} */}
               <div className="mt-[2rem]">

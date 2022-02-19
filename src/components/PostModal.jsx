@@ -25,6 +25,7 @@ import "swiper/css/pagination";
 // const Modal = lazy(() => import("./UI/Modal"));
 
 import Modal from "react-modal";
+import PostOptions from "./Feed/Post/PostOptions";
 const customStyles = {
   overlay: {
     position: "fixed",
@@ -53,12 +54,12 @@ Modal.setAppElement("#modal--overlay");
 const { SKIN_TONE_MEDIUM_DARK } = lazy(() => import("emoji-picker-react"));
 const ReactTimeAgo = lazy(() => import("react-time-ago"));
 // main func
-const mainUser = getInfo()
+const mainUser = getInfo();
 const PostModal = ({ user, post }) => {
   // State
-  console.log(user)
-  console.log("Post in postmodal: ");
-  console.log(post);
+  // console.log(user);
+  // console.log("Post in postmodal: ");
+  // console.log(post);
   const [isAuthor, setIsAuthor] = useState(false);
   const [isAuthorComment, setIsAuthorComment] = useState(false);
   const [isPostOptions, setIsPostOptions] = useState(false);
@@ -128,9 +129,8 @@ const PostModal = ({ user, post }) => {
       } else {
         !isCancelled && setNumsLike(post?.like?.length);
         post.like.map((wholike) => {
-          console.log(wholike?.postedBy?._id, mainUser.id )
+          console.log(wholike?.postedBy?._id, mainUser.id);
           if (wholike?.postedBy?._id === mainUser.id && !isCancelled) {
-
             return setIsLiked(true);
           } else return null;
         });
@@ -245,55 +245,32 @@ const PostModal = ({ user, post }) => {
       </div>
     </div>
   );
-
+  const [isFollowing, setIsFollowing] = useState(() => {
+    client.fetch(`*[_id =="${post.postedBy._id}"]`).then((data) => {
+      data[0].follower.map((u) => {
+        if (u.userId === user._id) {
+          console.log("following");
+          return setIsFollowing(true);
+        }
+        return null;
+      });
+    });
+  });
   return (
     <Suspense fallback={<Spinner />}>
       {isPostOptions && post && (
-        <Modal
-          isOpen={modalIsOpen}
-          // onAfterOpen={afterOpenModal}
-          onRequestClose={closeHandler}
-          style={customStyles}
-          contentLabel="Modal"
-        >
-          <div className="text-center flex flex-col justify-between lg:w-[30vw] md:[40vw] lg:h-[50vh] h-[65vh] w-[80vw]">
-            {!isAuthor && (
-              <>
-                <p className="cursor-pointer text-[#ED4956] font-medium pt-[1rem]">
-                  Report
-                </p>
-                <hr />
-                <p className="cursor-pointer text-[#ED4956] font-medium ">
-                  Follow
-                </p>
-              </>
-            )}
-            {isAuthor && (
-              <>
-                <p className="cursor-pointer text-[#ED4956] font-medium pt-[1rem]">
-                  Edit
-                </p>
-                <hr />
-                <p
-                  className="cursor-pointer text-[#ED4956] font-medium "
-                  onClick={deletePostHandler}
-                >
-                  Delete
-                </p>
-              </>
-            )}
-            <hr />
-            <p className=" cursor-pointer ">Share to...</p>
-            <hr />
-            <p className="cursor-pointer ">Copy link</p>
-            <hr />
-            <p className="cursor-pointer ">Embed</p>
-            <hr />
-            <p onClick={closeHandler} className="cursor-pointer pb-[1rem]">
-              Cancel
-            </p>
-          </div>
-        </Modal>
+        <PostOptions
+          modalIsOpen={modalIsOpen}
+          closeHandler={closeHandler}
+          isAuthor={isAuthor}
+          userID={user._id}
+          post={post}
+          deletePostHandler={deletePostHandler}
+          isFollowing={isFollowing}
+          changeFollowState={() => {
+            setIsFollowing((prev) => !prev);
+          }}
+        />
       )}
       {isCommentOptions && post && (
         <Modal

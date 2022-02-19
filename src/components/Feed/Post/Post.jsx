@@ -6,7 +6,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useState } from "react";
-import { client } from "../../../client";
+// import { client } from "../../../client";
 import { Link, useNavigate } from "react-router-dom";
 import Spinner from "../../UI/Spinner";
 import {
@@ -15,7 +15,9 @@ import {
   savePostHelper,
 } from "../../../utils/helper";
 import Picker from "emoji-picker-react";
-import Modal from "react-modal";
+// import Modal from "react-modal";
+import PostOptions from "./PostOptions";
+import { client } from "../../../client";
 // import PostDetail from "./PostDetail";
 // import { v4 as uuidv4 } from "uuid";
 //  Lazy loading import
@@ -24,30 +26,6 @@ const ReactTimeAgo = lazy(() => import("react-time-ago"));
 // const Modal = lazy(() => import("../../UI/Modal"));
 const Loading = lazy(() => import("../../UI/Loading"));
 
-const customStyles = {
-  overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
-    zIndex: "40",
-  },
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-    padding: "0",
-    // width: "",
-    zIndex: "50",
-    borderRadius: "1rem",
-  },
-};
-Modal.setAppElement("#modal--overlay");
 // Main Func
 const Post = ({ post, user, fetchDataAfterDelete }) => {
   // console.log(post);
@@ -113,15 +91,6 @@ const Post = ({ post, user, fetchDataAfterDelete }) => {
       });
     }
   }, [post.like, post?.postedBy._id, user?._id]);
-  // deletePost
-  const deletePostHandler = async () => {
-    // setDeletingPost(true);
-    await client.delete(post._id).then(() => {
-      // setDeletingPost(false);
-      fetchDataAfterDelete();
-      closeHandler();
-    });
-  };
 
   const addComment = () => {
     if (comment) {
@@ -161,66 +130,34 @@ const Post = ({ post, user, fetchDataAfterDelete }) => {
       savePostHelper("unsave", post._id, user._id);
     }
   };
-
+  const [isFollowing, setIsFollowing] = useState(() => {
+    client.fetch(`*[_id =="${post.postedBy._id}"]`).then((data) => {
+      data[0].follower.map((u) => {
+        if (u.userId === user._id) {
+          console.log("following");
+          return setIsFollowing(true);
+        }
+        return null;
+      });
+    });
+  });
   return (
     <>
       <Suspense fallback={<Spinner />}>
-        <Modal
-          isOpen={modalIsOpen}
-          // onAfterOpen={afterOpenModal}
-          onRequestClose={closeHandler}
-          style={customStyles}
-          contentLabel="Modal"
-        >
-          <div className="text-center flex flex-col justify-between lg:w-[30vw] md:[40vw] lg:h-[50vh] h-[65vh] w-[80vw]">
-            {!isAuthor && (
-              <>
-                <p className="cursor-pointer text-[#ED4956] font-medium pt-[1rem]">
-                  Report
-                </p>
-                <hr />
-                <p className="cursor-pointer text-[#ED4956] font-medium ">
-                  Follow
-                </p>
-              </>
-            )}
-            {isAuthor && (
-              <>
-                <p className="cursor-pointer text-[#ED4956] font-medium pt-[1rem]">
-                  Edit
-                </p>
-                <hr />
-                <p
-                  className="cursor-pointer text-[#ED4956] font-medium "
-                  onClick={deletePostHandler}
-                >
-                  Delete
-                </p>
-              </>
-            )}
-            <hr />
-            <Link
-              className="cursor-pointer"
-              to={`/p/${post?._id}`}
-              onClick={() => {
-                document.body.style.overflowY = "scroll";
-              }}
-            >
-              Go to post
-            </Link>
-            <hr />
-            <p className=" cursor-pointer ">Share to...</p>
-            <hr />
-            <p className="cursor-pointer ">Copy link</p>
-            <hr />
-            <p className="cursor-pointer ">Embed</p>
-            <hr />
-            <p onClick={closeHandler} className="cursor-pointer pb-[1rem]">
-              Cancel
-            </p>
-          </div>
-        </Modal>
-
+        {modalIsOpen && (
+          <PostOptions
+            modalIsOpen={modalIsOpen}
+            closeHandler={closeHandler}
+            isAuthor={isAuthor}
+            userID={user._id}
+            post={post}
+            fetchDataAfterDelete={fetchDataAfterDelete}
+            isFollowing={isFollowing}
+            changeFollowState={() => {
+              setIsFollowing((prev) => !prev);
+            }}
+          />
+        )}
         <div className="bg-[#fff] mt-8 flex flex-col border-[1px] ">
           {/* Avatar and name */}
           <div className="flex items-center justify-between my-2 px-4">
